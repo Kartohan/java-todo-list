@@ -1,16 +1,16 @@
 package com.kartohan.kartohan_todo_list.todo.model;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "tasks")
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
-    private boolean compelted = false;
+    private boolean completed = false;
 
     public Long getId() {
         return id;
@@ -28,11 +28,11 @@ public class Task {
         this.title = title;
     }
 
-    public boolean isCompelted() {
-        return compelted;
+    public boolean isCompleted() {
+        return completed;
     }
 
-    public void setCompelted(boolean compelted) {
-        this.compelted = compelted;
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
 }
