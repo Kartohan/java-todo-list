@@ -1,6 +1,8 @@
 package com.kartohan.kartohan_todo_list.controller;
 
 import com.kartohan.kartohan_todo_list.repository.TaskRepository;
+import com.kartohan.kartohan_todo_list.service.TaskService;
+import com.kartohan.kartohan_todo_list.service.TaskServiceImpl;
 import com.kartohan.kartohan_todo_list.todo.model.Task;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,52 +17,44 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
-    private final TaskRepository taskRepository;
+    private final TaskService taskService;
 
     @Autowired
-    public TaskController(TaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
+    public TaskController(TaskService taskService) {
+        this.taskService = taskService;
     }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Task createTask(@RequestBody Task task) {
-        return taskRepository.save(task);
+        return taskService.saveTask(task);
     }
     @GetMapping
     public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+        return taskService.findAllTasks();
     }
     @GetMapping("/{id}")
     public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
-        Optional<Task> optionalTask = taskRepository.findById(id);
-        if (optionalTask.isPresent()) {
-            Task task = optionalTask.get();
-            return ResponseEntity.ok(task);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        Optional<Task> optionalTask = taskService.findTaskById(id);
+        return optionalTask.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+
     }
     @PutMapping("/{id}")
     public ResponseEntity<Task> updateTaskById(@PathVariable Long id, @RequestBody Task updatedTask) {
-        Optional<Task> optionalTask = taskRepository.findById(id);
-        if (optionalTask.isPresent()) {
-            Task existingTask = optionalTask.get();
-            existingTask.setTitle(updatedTask.getTitle());
-            existingTask.setCompleted(updatedTask.isCompleted());
-            Task savedTask = taskRepository.save(existingTask);
+        try {
+            Task savedTask = taskService.updateTask(id, updatedTask);
             return ResponseEntity.ok(savedTask);
-        } else {
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<Task> deleteTaskById(@PathVariable Long id) {
-        Optional<Task> optionalTask = taskRepository.findById(id);
-        if (optionalTask.isPresent()) {
-            Task task = optionalTask.get();
-            taskRepository.deleteById(id);
-            return ResponseEntity.ok(task);
-        } else {
+        try {
+            taskService.deleteTaskById(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
