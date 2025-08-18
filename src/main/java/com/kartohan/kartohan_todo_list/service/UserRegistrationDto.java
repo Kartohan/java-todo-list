@@ -3,8 +3,8 @@ package com.kartohan.kartohan_todo_list.service;
 import com.kartohan.kartohan_todo_list.user.model.User;
 
 public class UserRegistrationDto {
-    public String username;
-    public String password;
+    private String username;
+    private String password;
 
     public String getPassword() {
         return password;

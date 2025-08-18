@@ -12,20 +12,24 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    private UserServiceImpl (UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl (UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
     }
 
     @Override
-    public User registerUser(UserRegistrationDto registrationDto) {
+    public UserResponseDto registerUser(UserRegistrationDto registrationDto) {
         if (userRepository.findByUsername(registrationDto.getUsername()).isPresent()) {
             throw new RuntimeException("Username is already taken!");
         }
         User newUser = new User();
+        UserResponseDto userResponse = new UserResponseDto();
         newUser.setUsername(registrationDto.getUsername());
         String hashedPassword = passwordEncoder.encode(registrationDto.getPassword());
         newUser.setPassword(hashedPassword);
-        return userRepository.save(newUser);
+        userRepository.save(newUser);
+        userResponse.setId(newUser.getId());
+        userResponse.setUsername(newUser.getUsername());
+        return userResponse;
     }
 }
